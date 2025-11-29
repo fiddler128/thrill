@@ -340,7 +340,7 @@ void CHud :: Init( void )
 
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	m_pCvarScale = CVAR_CREATE("hud_scale", "1", FCVAR_ARCHIVE );
-	m_pCvarCrosshair = CVAR_CREATE("hud_crosshair", "0", FCVAR_ARCHIVE );
+	m_pCvarCrosshair = CVAR_CREATE("hud_crosshair", "1", FCVAR_ARCHIVE );
 	m_pCvarFovAdjust = CVAR_CREATE("hud_fovadjust", "0", FCVAR_ARCHIVE );
 	m_pCvarApparatus = CVAR_CREATE("hud_apparatus", "0", FCVAR_ARCHIVE );
 

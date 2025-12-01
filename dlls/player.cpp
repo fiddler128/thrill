@@ -3457,6 +3457,8 @@ int CBasePlayer::Restore( CRestore &restore )
 	else
 		g_engfuncs.pfnSetClientMaxspeed(edict(), 0 );
 
+	TabulateAmmo();
+
 	return status;
 }
 

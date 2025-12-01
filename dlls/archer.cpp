@@ -309,7 +309,6 @@ void CArcher::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case ARCHER_BEAM_ATTACK:
 		{
 	//	UTIL_ParticleEffect ( pev->origin, g_vecZero, 255, 25 );
-		ALERT ( at_console, "Archer: Beam attack!\n");
 	//	UTIL_EmitAmbientSound( ENT(pev), pev->origin, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
 		ClearBeams( );
 
@@ -347,7 +346,6 @@ void CArcher::HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 
 	case ARCHER_BEAM_DONE:
-		ALERT ( at_console, "Archer: Removing beams!\n");
 		ClearBeams();
 		break;
 	
@@ -477,12 +475,10 @@ void CArcher::UpdateMotion( void )
 	else if ( pev->speed > ARCHER_SWIM_SPEED )	
 	{
 		m_IdealActivity = ACT_RUN;
-	//	ALERT ( at_console, "Archer: Run!\n");
 	}
 	else
 	{
 		m_IdealActivity = ACT_WALK;
-	//	ALERT ( at_console, "Archer: Walk!\n");
 	}
 
 	// lean
@@ -563,13 +559,11 @@ void CArcher::UpdateMotion( void )
 		{
 			ClearBeams();
 			m_IdealActivity = ACT_RANGE_ATTACK1;
-			ALERT ( at_console, "Archer: Can range attack!\n");
 		}
 	}	
 	else if ( m_MonsterState == MONSTERSTATE_COMBAT && HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 	{
 		m_IdealActivity = ACT_MELEE_ATTACK1;
-		ALERT ( at_console, "Archer: Can melee attack!\n");
 	}
 
 	// Out of water check
@@ -637,7 +631,6 @@ void CArcher::SwimThink( void )
 
 	if ( FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
 	{
-	//	ALERT( at_console, "Archer: No client in PVS!\n" );
 		pev->nextthink = gpGlobals->time + RANDOM_FLOAT(1,1.5);
 		pev->velocity = g_vecZero;
 		return;
@@ -666,7 +659,6 @@ void CArcher::SwimThink( void )
 			SwitchArcherState();
 		else
 		{
-			ALERT( at_console, "Archer: Chasing enemy!\n" );
 			// Chase the enemy's eyes
 			m_height = pTarget->pev->origin.z + pTarget->pev->view_ofs.z - 5;
 			// Clip to viable water area

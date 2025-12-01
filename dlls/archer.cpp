@@ -852,6 +852,5 @@ void CArcher::Killed(entvars_t *pevAttacker, int iGib)
 		SetActivity( ACT_DIEFORWARD );
 	
 	pev->movetype = MOVETYPE_TOSS;
-	pev->takedamage = DAMAGE_NO;
 	SetThink( &CArcher::DeadThink );
 }

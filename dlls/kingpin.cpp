@@ -283,6 +283,9 @@ Schedule_t *CKingpin :: GetSchedule( void )
 	{
 	case MONSTERSTATE_COMBAT:
 		{
+			if (HasConditions(bits_COND_LIGHT_DAMAGE) || HasConditions(bits_COND_HEAVY_DAMAGE))
+				return GetScheduleOfType( SCHED_COMBAT_FACE );	// dont flinch
+
 			return CBaseMonster :: GetSchedule();
 		}
 		break;

@@ -3,7 +3,6 @@
 //=========================================================
 
 // UNDONE: Clean up magic numbers!!!
-// UNDONE: Some variable namings are confusing
 // UNDONE: Is it necessary to store both the entity pointer and edict at the same time?
 
 #include	"extdll.h"
@@ -56,26 +55,26 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	BOOL m_fCatchPlayer;
-	BOOL m_fCatchRecently;
-	float m_flHoldTime;
-	Vector sbPreviousOrigin;
+	BOOL m_fCaughtPrey;
+	float m_flNextCapture;
+	Vector m_vecOldOrigin;
 
 	CBaseEntity *pTouchEnt;
 	edict_t *m_pVictimEdict;
 
-	BOOL m_trapActivated;
+	BOOL m_fTrapActivated;
 };
 
 LINK_ENTITY_TO_CLASS( monster_snapbug, CSnapBug );
 
 TYPEDESCRIPTION	CSnapBug::m_SaveData[] = 
 {
-	DEFINE_FIELD( CSnapBug, m_flHoldTime, FIELD_TIME ),
+	DEFINE_FIELD( CSnapBug, m_flNextCapture, FIELD_TIME ),
 	DEFINE_FIELD( CSnapBug, m_fCatchPlayer, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CSnapBug, m_fCatchRecently, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CSnapBug, m_fCaughtPrey, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CSnapBug, m_pVictimEdict, FIELD_EDICT ),
-	DEFINE_FIELD( CSnapBug, m_trapActivated, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CSnapBug, sbPreviousOrigin, FIELD_VECTOR ),
+	DEFINE_FIELD( CSnapBug, m_fTrapActivated, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CSnapBug, m_vecOldOrigin, FIELD_VECTOR ),
 };
 
 //IMPLEMENT_SAVERESTORE( CSnapBug, CBaseMonster );
@@ -135,7 +134,7 @@ void CSnapBug :: Spawn()
 
 	if ( FBitSet( pev->spawnflags, SF_SNAPBUG_TRAPMODE ) )
 	{
-		sbPreviousOrigin = pev->origin;
+		m_vecOldOrigin = pev->origin;
 		pev->origin.z -= SNAPBUG_PITHEIGHT;
 		SetThink ( &CSnapBug::SnapBugSubterrThink );
 		pev->movetype		= MOVETYPE_NOCLIP;
@@ -217,7 +216,7 @@ void CSnapBug :: LeapTouch ( CBaseEntity *pOther )
 	ChangeYaw(pev->yaw_speed);
 
 	SetThink ( &CSnapBug::SnapBugThink );
-	m_fCatchRecently = TRUE;
+	m_fCaughtPrey = TRUE;
 
 	if ( pOther->IsPlayer() )
 	{
@@ -232,12 +231,12 @@ void CSnapBug :: LeapTouch ( CBaseEntity *pOther )
 		if ( tr.flFraction != 1.0 )
 		{
 			ALERT( at_aiconsole, "CSnapbug: Can't capture target as it will get stuck!\n" );
-			m_flHoldTime = gpGlobals->time + 1.0;
+			m_flNextCapture = gpGlobals->time + 1.0;
 			SetTouch( NULL );
 			return;
 		}
 
-		m_flHoldTime = gpGlobals->time + 10.0;
+		m_flNextCapture = gpGlobals->time + 10.0;
 
 		pOther->pev->velocity.x *= 0.0;
 		pOther->pev->velocity.y *= 0.0;
@@ -256,14 +255,14 @@ void CSnapBug :: LeapTouch ( CBaseEntity *pOther )
 	{
 //		ALERT( at_aiconsole, "Gibbed the crab!\n" );
 		pOther->Killed( pev, GIB_ALWAYS );
-		m_flHoldTime = gpGlobals->time + 1.0;
+		m_flNextCapture = gpGlobals->time + 1.0;
 		SetTouch( NULL );
 
 		return;
 	}
 
 	pOther->TakeDamage( pev, pev, GetDamageAmount(), DMG_SLASH );
-	m_flHoldTime = gpGlobals->time + 1.0;
+	m_flNextCapture = gpGlobals->time + 1.0;
 	SetTouch( NULL );
 }
 
@@ -294,11 +293,11 @@ void CSnapBug :: SnapBugThink ( void )
 {
 	pev->nextthink = gpGlobals->time + 0.0;
 
-	if ( m_fCatchRecently )
+	if ( m_fCaughtPrey )
 	{
-		 if ( gpGlobals->time >= m_flHoldTime )
+		 if ( gpGlobals->time >= m_flNextCapture )
 		 {
-			m_fCatchRecently = FALSE;
+			m_fCaughtPrey = FALSE;
 			SetTouch ( &CSnapBug::LeapTouch );
 		 }
 	}
@@ -312,7 +311,7 @@ void CSnapBug :: SnapBugThink ( void )
 	if ( pTouchEnt->pev->movetype == MOVETYPE_NOCLIP )
 	{
 		ReleaseTarget();
-		m_flHoldTime = gpGlobals->time + 1.5;
+		m_flNextCapture = gpGlobals->time + 1.5;
 		return;
 	}
 
@@ -324,11 +323,11 @@ void CSnapBug :: SnapBugThink ( void )
 	{
 		ALERT( at_aiconsole, "CSnapBug: Target's too far!\n" );
 		ReleaseTarget();
-		m_flHoldTime = gpGlobals->time + 1.5;
+		m_flNextCapture = gpGlobals->time + 1.5;
 		return;
 	}
 
-	if ( gpGlobals->time < m_flHoldTime - 1.5 )
+	if ( gpGlobals->time < m_flNextCapture - 1.5 )
 	{
 	//	ALERT( at_aiconsole, "Here's my dinner!\n" );
 		
@@ -363,19 +362,19 @@ int CSnapBug :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 //=========================================================
 void CSnapBug :: SnapBugSubterrThink ( void )
 {
-	if ( !m_trapActivated ) FindNearestPrey();
+	if ( !m_fTrapActivated ) FindNearestPrey();
 
-	if ( pev->origin.z <= sbPreviousOrigin.z && m_trapActivated )	pev->origin.z += .75;		// .5 -> .75
+	if ( pev->origin.z <= m_vecOldOrigin.z && m_fTrapActivated )	pev->origin.z += .75;		// .5 -> .75
 
-	if ( pev->origin.z >= sbPreviousOrigin.z )
+	if ( pev->origin.z >= m_vecOldOrigin.z )
 	{
 		SetThink ( &CSnapBug::SnapBugThink );
-		m_trapActivated = FALSE;
+		m_fTrapActivated = FALSE;
 		pev->movetype = MOVETYPE_STEP;
 		SetTouch ( &CSnapBug::LeapTouch );
 	}
 
-	if ( !m_trapActivated )
+	if ( !m_fTrapActivated )
 		pev->nextthink = gpGlobals->time + .1;
 	else
 		pev->nextthink = gpGlobals->time;
@@ -393,7 +392,7 @@ void CSnapBug :: FindNearestPrey( void )
 	if ( FClassnameIs ( pEntity->pev, "monster_snapbug" ) )
 		return;
 		
-	m_trapActivated = TRUE;
+	m_fTrapActivated = TRUE;
 	ALERT( at_aiconsole, "SnapTrap: Found the target!\n" );
 	EMIT_SOUND( ENT(pev), CHAN_WEAPON, "snapbug/sb_dig1.wav", 1, ATTN_NORM );
 	SetTouch ( &CSnapBug::LeapTouch );
@@ -463,10 +462,10 @@ int CSnapBug::Restore( CRestore &restore )
 	SAVERESTOREDATA *pSaveData = (SAVERESTOREDATA *)gpGlobals->pSaveData;
 
 	// a way to prevent snapbug from disappearing on certain maps
-	if ( FBitSet( pev->spawnflags, SF_SNAPBUG_TRAPMODE ) && !m_trapActivated )
+	if ( FBitSet( pev->spawnflags, SF_SNAPBUG_TRAPMODE ) && !m_fTrapActivated )
 	{
 		ALERT( at_aiconsole, "SnapBug: Restored origin!\n" );
-		pev->origin = sbPreviousOrigin;
+		pev->origin = m_vecOldOrigin;
 		pev->origin.z -= SNAPBUG_PITHEIGHT;
 	}
 

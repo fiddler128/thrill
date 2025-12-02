@@ -191,9 +191,11 @@ void CSatchelCharge :: SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller
 			return;
 		}
 
-//		pPlayer->GiveNamedItem( "weapon_satchel" );
-//		NamedItem can dupe items in deathmatch, use GiveAmmo instead
-		pPlayer->GiveAmmo( 1, "Satchel Charge", SATCHEL_MAX_CARRY );
+		if ( pPlayer->pev->weapons & (1<<WEAPON_SATCHEL) )
+			pPlayer->GiveAmmo( 1, "Satchel Charge", SATCHEL_MAX_CARRY );
+		else
+			pPlayer->GiveNamedItem( "weapon_satchel" );
+
 		EMIT_SOUND(ENT(pPlayer->pev), CHAN_ITEM, "items/ammopickup1.wav", 1, ATTN_NORM);
 
 		CBaseEntity *pOwner = CBaseEntity::Instance(pev->owner);

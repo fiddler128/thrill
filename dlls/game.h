@@ -43,7 +43,6 @@ extern cvar_t	*g_psv_aim;
 extern cvar_t	*g_footsteps;
 
 extern cvar_t	explosions;
-extern cvar_t	ladders;
 extern cvar_t	pushables;
 extern cvar_t	ricochet;
 extern cvar_t	drawroute;

@@ -49,7 +49,6 @@ cvar_t	*g_psv_aim = NULL;
 cvar_t	*g_footsteps = NULL;
 
 // Misc Cvars
-cvar_t	ladders		= {"sv_ladderhack", "0",  FCVAR_SERVER };
 cvar_t	pushables	= {"sv_pushablefix", "1",  FCVAR_SERVER };
 cvar_t	ricochet	= {"sv_ricochet", "0",  FCVAR_SERVER };
 cvar_t	drawroute	= {"sv_drawroute", "0", FCVAR_SERVER };
@@ -599,7 +598,6 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER (&mp_chattime);
 
-	CVAR_REGISTER (&ladders);
 	CVAR_REGISTER (&pushables);
 	CVAR_REGISTER (&ricochet);
 	CVAR_REGISTER (&drawroute);

@@ -2280,9 +2280,6 @@ physent_t *PM_Ladder( void )
 	hull_t		*hull;
 	int			num;
 	vec3_t		test;
-	qboolean ladderhack = false;
-	
-	ladderhack = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "lhk" ) ) == 1 ? true : false;
 
 	for ( i = 0; i < pmove->nummoveent; i++ )
 	{
@@ -2296,18 +2293,6 @@ physent_t *PM_Ladder( void )
 
 			// Offset the test point appropriately for this hull.
 			VectorSubtract ( pmove->origin, test, test);
-
-			//ugly hack for backward compatibility with alpha
-			if ( ladderhack )
-			{
-				if ( test[0] > 0 )
-					test[0] += 1;
-				else test[0] -= 1;
-
-				if ( test[1] > 0 )
-					test[1] += 1;
-				else test[1] -= 1;	
-			}
 
 			// Test the player's hull for intersection with this model
 			if ( pmove->PM_HullPointContents (hull, num, test) == CONTENTS_EMPTY)

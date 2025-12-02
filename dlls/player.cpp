@@ -3363,11 +3363,6 @@ void CBasePlayer :: Precache( void )
 	// Make sure any necessary user messages have been registered
 	LinkUserMessages();
 
-	if ( CVAR_GET_FLOAT("sv_ladderhack") > 0 )
-		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "lhk", "1" );
-	else
-		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "lhk", "0" );
-
 	m_iUpdateTime = 5;  // won't update for 1/2 a second
 
 	if ( gInitHUD )

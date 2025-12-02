@@ -38,6 +38,10 @@ enum satchel_radio_e {
 	SATCHEL_RADIO_HOLSTER
 };
 
+#define	SATCHEL_NOT_DEPLOYED		0	// there are no satchels in the map that are associated with this player
+#define SATCHEL_DEPLOYED			1	// there are satchels ready to be exploded by player
+#define SATCHEL_RELOADING			2	// player is switching from radio to satchel
+
 
 
 class CSatchelCharge : public CGrenade
@@ -227,7 +231,7 @@ void CSatchelCharge :: SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller
 			CSatchel *wSatchel = (CSatchel *)pPlayer->m_pActiveItem;
 
 			wSatchel->Holster();
-			wSatchel->m_chargeReady = 2;
+			wSatchel->m_chargeReady = SATCHEL_RELOADING;
 			wSatchel->m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 2.1;
 			wSatchel->m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.1;
 			wSatchel->m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
@@ -263,7 +267,7 @@ int CSatchel::AddDuplicate( CBasePlayerItem *pOriginal )
 	{
 		pSatchel = (CSatchel *)pOriginal;
 
-		if ( pSatchel->m_chargeReady != 0 )
+		if ( pSatchel->m_chargeReady != SATCHEL_NOT_DEPLOYED )
 		{
 			// player has some satchels deployed. Refuse to add more.
 			return FALSE;
@@ -280,7 +284,7 @@ int CSatchel::AddToPlayer( CBasePlayer *pPlayer )
 	int bResult = CBasePlayerItem::AddToPlayer( pPlayer );
 
 	pPlayer->pev->weapons |= (1<<m_iId);
-	m_chargeReady = 0;// this satchel charge weapon now forgets that any satchels are deployed by it.
+	m_chargeReady = SATCHEL_NOT_DEPLOYED;// this satchel charge weapon now forgets that any satchels are deployed by it.
 
 	if ( bResult )
 	{
@@ -341,7 +345,7 @@ BOOL CSatchel::IsUseable( void )
 		return TRUE;
 	}
 
-	if ( m_chargeReady != 0 )
+	if ( m_chargeReady != SATCHEL_NOT_DEPLOYED )
 	{
 		// player isn't carrying any satchels, but has some out
 		return TRUE;
@@ -358,7 +362,7 @@ BOOL CSatchel::CanDeploy( void )
 		return TRUE;
 	}
 
-	if ( m_chargeReady != 0 )
+	if ( m_chargeReady != SATCHEL_NOT_DEPLOYED )
 	{
 		// player isn't carrying any satchels, but has some out
 		return TRUE;
@@ -410,12 +414,12 @@ void CSatchel::PrimaryAttack()
 {
 	switch (m_chargeReady)
 	{
-	case 0:
+	case SATCHEL_NOT_DEPLOYED:
 		{
 		Throw( );
 		}
 		break;
-	case 1:
+	case SATCHEL_DEPLOYED:
 		{
 		SendWeaponAnim( SATCHEL_RADIO_FIRE );
 
@@ -430,19 +434,18 @@ void CSatchel::PrimaryAttack()
 				if (pSatchel->pev->owner == pPlayer)
 				{
 					pSatchel->Use( m_pPlayer, m_pPlayer, USE_ON, 0 );
-					m_chargeReady = 2;
 				}
 			}
 		}
 
-		m_chargeReady = 2;
+		m_chargeReady = SATCHEL_RELOADING;
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
 		break;
 		}
 
-	case 2:
+	case SATCHEL_RELOADING:
 		// we're reloading, don't allow fire
 		{
 		}
@@ -453,7 +456,7 @@ void CSatchel::PrimaryAttack()
 
 void CSatchel::SecondaryAttack( void )
 {
-	if ( m_chargeReady != 2 )
+	if ( m_chargeReady != SATCHEL_RELOADING )
 	{
 		Throw( );
 	}
@@ -484,7 +487,7 @@ void CSatchel::Throw( void )
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-		m_chargeReady = 1;
+		m_chargeReady = SATCHEL_DEPLOYED;
 		
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
@@ -501,20 +504,20 @@ void CSatchel::WeaponIdle( void )
 
 	switch( m_chargeReady )
 	{
-	case 0:
+	case SATCHEL_NOT_DEPLOYED:
 		SendWeaponAnim( SATCHEL_FIDGET1 );
 		// use tripmine animations
 		strcpy( m_pPlayer->m_szAnimExtention, "trip" );
 		break;
-	case 1:
+	case SATCHEL_DEPLOYED:
 		SendWeaponAnim( SATCHEL_RADIO_FIDGET1 );
 		// use hivehand animations
 		strcpy( m_pPlayer->m_szAnimExtention, "hive" );
 		break;
-	case 2:
+	case SATCHEL_RELOADING:
 		if ( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 		{
-			m_chargeReady = 0;
+			m_chargeReady = SATCHEL_NOT_DEPLOYED;
 			RetireWeapon();
 			return;
 		}
@@ -533,7 +536,7 @@ void CSatchel::WeaponIdle( void )
 
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
-		m_chargeReady = 0;
+		m_chargeReady = SATCHEL_NOT_DEPLOYED;
 		break;
 	}
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );// how long till we do this again.

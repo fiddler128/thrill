@@ -23,7 +23,7 @@ class CSnapBug : public CBaseMonster
 public:
 	void Spawn( void );
 	void Precache( void );
-	void SetYawSpeed( void );
+
 	Vector Center( void ){ return Vector( pev->origin.x, pev->origin.y, pev->origin.z + 6 ); }
 	Vector BodyTarget( const Vector &posSrc ){ return Center( ); }
 	void PainSound( void ){ EMIT_SOUND_DYN( edict(), CHAN_VOICE, "snapbug/sb_pain1.wav", 1.0, ATTN_IDLE, 0, 100 ); }
@@ -80,28 +80,6 @@ TYPEDESCRIPTION	CSnapBug::m_SaveData[] =
 //IMPLEMENT_SAVERESTORE( CSnapBug, CBaseMonster );
 
 //=========================================================
-// SetYawSpeed - allows each sequence to have a different
-// turn rate associated with it.
-//=========================================================
-void CSnapBug :: SetYawSpeed ( void )
-{
-	int ys;
-
-	switch ( m_Activity )
-	{
-	case ACT_RUN:			
-	case ACT_WALK:			
-		ys = 30;
-		break;
-	default:
-		ys = 60;
-		break;
-	}
-
-	pev->yaw_speed = ys;
-}
-
-//=========================================================
 // Spawn
 //=========================================================
 void CSnapBug :: Spawn()
@@ -121,6 +99,7 @@ void CSnapBug :: Spawn()
 	// pev->view_ofs		= Vector ( 0, 0, 20 );
 	m_flFieldOfView		= 0.5;
 	m_MonsterState		= MONSTERSTATE_NONE;
+	pev->yaw_speed		= 60;
 
 	MonsterInit();
 

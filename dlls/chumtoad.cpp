@@ -433,6 +433,15 @@ Schedule_t *CChub :: GetSchedule ( void )
 {
 	switch( m_MonsterState )
 	{
+		case MONSTERSTATE_IDLE:
+		{
+			// hop around randomly
+			if ( RANDOM_LONG(0,99) <= 50 )
+				return GetScheduleOfType(SCHED_TAKE_COVER_FROM_ORIGIN);
+
+			return CBaseMonster::GetSchedule();
+		break;
+		}
 		case MONSTERSTATE_COMBAT:
 		{
 		//	ALERT( at_console, "Chub: MONSTERSTATE_COMBAT!\n" );

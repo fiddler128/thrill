@@ -134,6 +134,11 @@ cvar_t	sk_bloater_dmg_bolt1 = {"sk_bloater_dmg_bolt1","0"};
 cvar_t	sk_bloater_dmg_bolt2 = {"sk_bloater_dmg_bolt2","0"};
 cvar_t	sk_bloater_dmg_bolt3 = {"sk_bloater_dmg_bolt3","0"};
 
+// Chub Toad
+cvar_t	sk_chubtoad_health1 = {"sk_chubtoad_health1","0"};
+cvar_t	sk_chubtoad_health2 = {"sk_chubtoad_health2","0"};
+cvar_t	sk_chubtoad_health3 = {"sk_chubtoad_health3","0"};
+
 // Gargantua
 cvar_t	sk_gargantua_health1 = {"sk_gargantua_health1","0"};
 cvar_t	sk_gargantua_health2 = {"sk_gargantua_health2","0"};
@@ -681,6 +686,11 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sk_bloater_dmg_bolt1 );
 	CVAR_REGISTER ( &sk_bloater_dmg_bolt2 );
 	CVAR_REGISTER ( &sk_bloater_dmg_bolt3 );
+
+	// Chub Toad
+	CVAR_REGISTER ( &sk_chubtoad_health1 );
+	CVAR_REGISTER ( &sk_chubtoad_health2 );
+	CVAR_REGISTER ( &sk_chubtoad_health3 );
 
 	// Gargantua
 	CVAR_REGISTER ( &sk_gargantua_health1 );// {"sk_gargantua_health1","0"};

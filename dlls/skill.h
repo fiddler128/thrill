@@ -47,6 +47,8 @@ struct skilldata_t
 	float bullsquidDmgWhip;
 	float bullsquidDmgSpit;
 
+	float chubtoadHealth;
+
 	float gargantuaHealth;
 	float gargantuaDmgSlash;
 	float gargantuaDmgFire;

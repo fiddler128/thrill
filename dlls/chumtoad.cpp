@@ -182,7 +182,7 @@ void CChub :: Spawn (void)
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_GREEN;
 	pev->effects		= 0;
-	pev->health			= 25;
+	pev->health			= gSkillData.chubtoadHealth;
 	pev->view_ofs		= Vector ( 0, 0, 16 );
 	m_flFieldOfView		= VIEW_FIELD_FULL;
 	m_MonsterState		= MONSTERSTATE_NONE;

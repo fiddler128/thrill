@@ -162,6 +162,9 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.bullsquidDmgWhip = GetSkillCvar( "sk_bullsquid_dmg_whip");
 	gSkillData.bullsquidDmgSpit = GetSkillCvar( "sk_bullsquid_dmg_spit");
 
+	// Chub Toad
+	gSkillData.chubtoadHealth = GetSkillCvar( "sk_chubtoad_health");
+
 	// Gargantua
 	gSkillData.gargantuaHealth = GetSkillCvar( "sk_gargantua_health");
 	gSkillData.gargantuaDmgSlash = GetSkillCvar( "sk_gargantua_dmg_slash");

@@ -115,13 +115,19 @@ BOOL CChubGrenade :: TraceChub( void )
 	}
 
 	// FIXME: magic number
-	UTIL_TraceHull( trace_origin + gpGlobals->v_forward * 24, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, NULL, &tr );
+	UTIL_TraceLine( trace_origin + gpGlobals->v_forward * 24, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, NULL, &tr );
 
-	if ( tr.fAllSolid == 0 && tr.fStartSolid == 0 && tr.flFraction > 0.25 )
-		return TRUE;
+	if ( tr.fAllSolid || tr.fStartSolid || tr.flFraction <= 0.25 )
+		return FALSE;
+	
+	UTIL_TraceHull(tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, head_hull, NULL, &tr);
+
+	if ( tr.pHit )
+		return FALSE;
+
 #endif
 	
-	return FALSE;
+	return TRUE;
 }
 
 void CChubGrenade :: Throw()

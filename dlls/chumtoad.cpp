@@ -8,9 +8,7 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"game.h"
-#include	"flyingmonster.h"
 #include	"weapons.h"
-#include	"nodes.h"
 #include	"player.h"
 #include	"soundent.h"
 #include	"gamerules.h"
@@ -23,8 +21,6 @@
 #define		CHUB_EYE_CLOSED			2
 
 // Chub Toad monster begins here
-
-//	TODO: FIX AMPHIBIOUS & PLAYDEAD BEHAVIOR OR GET RID OF IT!!!
 
 //=========================================================
 // monster-specific schedule types
@@ -385,6 +381,8 @@ void CChub :: GibMonster( void )
 
 int CChub :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
+	int iTakeDamage;
+
 	if ( bitsDamageType & ( DMG_RADIATION ) ) flDamage = 0;
 
 	if ( flDamage > 0 )
@@ -399,7 +397,16 @@ int CChub :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 		Remember( bits_MEMORY_PROVOKED );
 	}
 
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	// HACK: change deadflag so we can pass IsAlive check
+	if ( m_fPlayingDead )
+		pev->deadflag = DEAD_NO;
+
+	iTakeDamage = CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+
+	if ( m_fPlayingDead )
+		pev->deadflag = DEAD_DEAD;
+
+	return iTakeDamage;
 }
 
 //=========================================================
@@ -497,9 +504,65 @@ Schedule_t *CChub :: GetSchedule ( void )
 	}
 }
 
+#define	CHUB_CHECK_DIST		72
+#define CHUB_SWIM_SPEED		50
+#define CHUB_SWIM_ACCEL		90
+#define CHUB_TURN_RATE		70
+
+// UNDONE: implement proper obstacle avoidance behavior
+void CChub :: Swim ( void )
+{
+	TraceResult		tr;
+	Vector			vecTest;
+	BOOL			fStuck = FALSE;
+
+	if ( m_Activity != ACT_SWIM )
+		SetActivity(ACT_SWIM);
+	
+	Vector tmp = pev->angles;
+	tmp.x = -tmp.x;
+	UTIL_MakeVectors ( tmp );
+
+	vecTest = pev->origin + gpGlobals->v_forward * RANDOM_LONG(CHUB_CHECK_DIST/2, CHUB_CHECK_DIST);
+
+	UTIL_TraceLine(pev->origin, vecTest, missile, edict(), &tr);
+	UTIL_DrawBeam(pev->origin, tr.vecEndPos, 16, 128, 16);
+	UTIL_DrawBeam(pev->origin, vecTest, 128, 0, 0);
+
+	if ( tr.flFraction <= 0.97 )
+		fStuck = TRUE;
+
+	TRACE_MONSTER_HULL(edict(), tr.vecEndPos, tr.vecEndPos, missile, edict(), &tr);
+
+	if ( tr.fStartSolid )
+		fStuck = TRUE;
+
+	if ( !fStuck )
+	{
+	//	ALERT(at_console, "VICTORY %f\n", tr.flFraction);
+		pev->speed = UTIL_Approach( CHUB_SWIM_SPEED, pev->speed, CHUB_SWIM_ACCEL * .1 );
+		pev->velocity = gpGlobals->v_forward * pev->speed;
+		pev->avelocity = g_vecZero;
+		pev->angles.y += 2.5 * RANDOM_LONG(-1, 1);
+
+	//	UTIL_ParticleEffect(pev->origin, Vector(0,0,0), 224, 16);
+
+		pev->nextthink = gpGlobals->time + .1;
+	}
+	else
+	{
+	//	ALERT(at_console, "%f\n", tr.flFraction);
+
+		pev->velocity = g_vecZero;
+		pev->angles.y += 5;
+
+		pev->nextthink = gpGlobals->time + .05;
+	}
+}
+
 void CChub :: MonsterThink ( void )
 {
-	if (m_flBlink < gpGlobals->time && !m_fPlayingDead)
+	if (m_flBlink < gpGlobals->time && (!m_fPlayingDead || m_fInWater))
 	{
 		if ( pev->skin < CHUB_EYE_CLOSED )
 		{
@@ -511,6 +574,37 @@ void CChub :: MonsterThink ( void )
 			pev->skin = CHUB_EYE_OPEN;
 			m_flBlink = gpGlobals->time + RANDOM_FLOAT(2,5);
 		}
+	}
+
+	if ( m_fInWater )
+	{
+		if ( pev->health <= 0 )
+		{
+		//	ALERT(at_console, "dead\n");
+			SetActivity(ACT_DIESIMPLE);
+			UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+
+			SetThink(&CChub::WaterDeathThink);
+			pev->nextthink = gpGlobals->time + .1;
+			pev->gravity = 0.1;
+		}
+		else if ( pev->waterlevel != 3 )
+		{
+			pev->deadflag = DEAD_NO;
+			pev->movetype = MOVETYPE_STEP;
+			pev->velocity = pev->avelocity = g_vecZero;
+			m_fInWater = m_fPlayingDead = FALSE;
+		}
+		else Swim(); //	just dumbly swim around
+		
+		return;
+	}
+	else if ( pev->waterlevel == 3 )
+	{
+		pev->deadflag = DEAD_DEAD;	// enemies ignore chub when it swims
+		pev->movetype = MOVETYPE_FLY;
+		pev->velocity = pev->avelocity = g_vecZero;
+		m_fInWater = m_fPlayingDead = TRUE;
 	}
 
 	if (!m_flNextCroak)
@@ -530,6 +624,23 @@ void CChub :: MonsterThink ( void )
 	}
 
 	CBaseMonster::MonsterThink();
+}
+
+void CChub :: WaterDeathThink( void )
+{
+	if ( pev->skin < CHUB_EYE_CLOSED )
+		pev->skin++;
+
+	if ( pev->waterlevel == 3 )
+	{
+		pev->movetype = MOVETYPE_FLY;
+		pev->velocity = pev->velocity * 0.5;
+		pev->avelocity = pev->avelocity * 0.9;
+		pev->velocity.z += 4;
+	}
+	else pev->movetype = MOVETYPE_BOUNCE;
+
+	pev->nextthink = gpGlobals->time + .1;
 }
 
 // Chub Toad monster ends here

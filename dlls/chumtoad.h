@@ -27,6 +27,8 @@ public:
 	BOOL IsBarnaclePrey ( void ) { return TRUE; }
 
 	void EXPORT MonsterThink ( void );
+	void EXPORT WaterDeathThink ( void );
+	void Swim( void );
 
 	CUSTOM_SCHEDULES;
 
@@ -34,4 +36,5 @@ public:
 	BOOL	m_fPlayingDead;
 	float	m_flPlayDeadTime;
 	float	m_flNextCroak; // don't save
+	BOOL	m_fInWater;
 };

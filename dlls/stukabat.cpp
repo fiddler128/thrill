@@ -836,43 +836,22 @@ void CStukaBat :: CallForHelp( float flDist )
 
 	ALERT(at_aiconsole, "Stukabat: Help!\n");
 
-	BOOL doCheck = TRUE;
-	
-	while ( doCheck )
+	while ( (pEntity = UTIL_FindEntityByClassname(pEntity, STRING(pev->classname))) != NULL )
 	{
-		if ( !FStringNull( pev->netname ) )
-		{
-			pEntity = UTIL_FindEntityByString( pEntity, "netname", STRING( pev->netname ));
-		}
-		else
-		{
-			pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, flDist );
-		}
+		if ( pEntity->edict() == edict() )
+			continue;
 
-		if ( pEntity == NULL || pEntity->edict() == this->edict() )
-		{
-			doCheck = FALSE;
-			break;
-		}
+		float d = (pev->origin - pEntity->pev->origin).Length();
+		
+		if (d > flDist)
+			continue;
 
 		CStukaBat *pStuka = (CStukaBat *)Instance(pEntity->edict());
 
-		if ( pStuka )
-		{
-			float d = (pev->origin - pEntity->pev->origin).Length();
-			
-			if (d <= flDist)
-			{
-				ALERT(at_aiconsole, "Stukabat: grabbed a buddie\n");
-				if ( pStuka->m_iSleepState == STUKA_ASLEEP )
-					pStuka->Wake();
-				
-			//	if ( hEnemy != NULL )
-			//		pStuka->PushEnemy( hEnemy, vecLocation );
-			}
-		}
+		ALERT(at_aiconsole, "Stukabat: grabbed a buddie\n");
+		if ( pStuka->m_iSleepState == STUKA_ASLEEP )
+			pStuka->Wake();
 	}
-
 }
 
 //=========================================================

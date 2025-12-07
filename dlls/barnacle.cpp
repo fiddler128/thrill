@@ -41,6 +41,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	CBaseEntity *TongueTouchEnt ( float *pflLength );
+	BOOL FIsPrey ( CBaseEntity *pEntity );
 	int  IRelationship ( CBaseEntity *pTarget ); 
 	int  Classify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -335,15 +336,15 @@ void CBarnacle :: BarnacleThink ( void )
 			if ( !m_fLiftingPrey && !m_cGibs )	// don't bother with traces if pulling a target or already full
 			{
 				TraceResult tr;
-				CBaseMonster *pEntity = NULL;
-				bool traceSuccessful = FALSE;
+				CBaseEntity *pEntity = NULL;
+				BOOL traceSuccessful = FALSE;
 
 				UTIL_TraceHull(pev->origin, pev->origin - Vector( 0, 0, flLength ), dont_ignore_monsters, human_hull, edict(), &tr);
 				if ( tr.flFraction != 1.0 )
 				{
-					pEntity = (CBaseMonster*)Instance(tr.pHit);
-					if ( pEntity && pEntity->IsAlive() && pEntity->Classify() && pEntity->Classify() != CLASS_BARNACLE
-						&& pEntity->Classify() != CLASS_INSECT && pEntity->pev->waterlevel < 3 )
+					pEntity = Instance(tr.pHit);
+					
+					if ( pEntity && FIsPrey(pEntity) )
 					{
 						if ( pEntity->pev->origin.z < pev->origin.z )
 						{
@@ -371,10 +372,9 @@ void CBarnacle :: BarnacleThink ( void )
 					vecCenter = pev->origin;
 					vecCenter.z -= flLength - searchRadius;
 
-					pEntity = (CBaseMonster*)UTIL_FindEntityInSphere( pEntity, vecCenter, searchRadius );
+					pEntity = UTIL_FindEntityInSphere( pEntity, vecCenter, searchRadius );
 
-					if ( pEntity && pEntity->Classify() && pEntity->Classify() != CLASS_BARNACLE 
-						&& pEntity->Classify() != CLASS_INSECT && pEntity->pev->waterlevel < 3 )
+					if ( pEntity && FIsPrey(pEntity) )
 					{
 						ALERT( at_aiconsole, "CBarnacle: Found prey via sphere!\n" );
 						m_flWaitForPrey = gpGlobals->time + 3.0;
@@ -531,4 +531,23 @@ CBaseEntity *CBarnacle :: TongueTouchEnt ( float *pflLength )
 	}
 
 	return NULL;
+}
+
+BOOL CBarnacle :: FIsPrey ( CBaseEntity *pEntity )
+{
+	CBaseMonster *pMonster = NULL;
+
+	if ( pEntity->edict() == edict() )
+		return FALSE;
+
+	if ( !(pEntity->pev->flags & (FL_MONSTER | FL_CLIENT)) )
+		return FALSE;
+
+	pMonster = pEntity->MyMonsterPointer();
+
+	if ( !pMonster )
+		return FALSE;
+
+	return pMonster->IsAlive() && pMonster->Classify() && pMonster->Classify() != CLASS_BARNACLE
+		&& pMonster->Classify() != CLASS_INSECT && pMonster->pev->waterlevel < 3;
 }

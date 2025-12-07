@@ -108,7 +108,6 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 
 	DEFINE_FIELD( CBaseMonster, m_scriptState, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_pCine, FIELD_CLASSPTR ),
-	DEFINE_FIELD( CBaseMonster, m_pGoalEnt, FIELD_CLASSPTR ),
 
 	DEFINE_FIELD( CBaseMonster, m_flDistDieForward, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseMonster, m_flDistDieBackward, FIELD_FLOAT ),

@@ -933,7 +933,7 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 	}
 	m_pActiveItem = NULL;
 
-	for (i = 0; i <= ITEM_LAST; i++)
+	for (i = 0; i < ITEM_LAST; i++)
 	{
 		m_rgItems[i] = NULL;
 	}

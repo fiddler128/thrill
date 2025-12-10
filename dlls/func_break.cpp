@@ -826,16 +826,18 @@ void CBreakable::Die( void )
 
 		pent = CREATE_NAMED_ENTITY( MAKE_STRING((char *)STRING(m_iszSpawnObject)));
 
-		pItem = Instance( pent );
-		pItem->pev->owner = edict();
-		pItem->pev->origin = vecItemPos;
-		pItem->pev->angles = pev->angles;
-	//	CBaseEntity *pItem = CBaseEntity::Create( (char *)STRING(m_iszSpawnObject), vecItemPos, pev->angles, edict() );
-	
-		if ( FBitSet( pev->spawnflags, SF_BREAK_NOFALL ) ) 
-			SetBits(pItem->pev->spawnflags, SF_AMMO_NOFALL);
+		if ( !FNullEnt(pent) )
+		{
+			pItem = Instance( pent );
+			pItem->pev->owner = edict();
+			pItem->pev->origin = vecItemPos;
+			pItem->pev->angles = pev->angles;
+		
+			if ( FBitSet( pev->spawnflags, SF_BREAK_NOFALL ) ) 
+				SetBits(pItem->pev->spawnflags, SF_AMMO_NOFALL);
 
-		DispatchSpawn( pItem->edict() );
+			DispatchSpawn( pItem->edict() );
+		}
 	}
 
 

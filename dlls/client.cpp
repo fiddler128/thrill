@@ -927,10 +927,6 @@ void ClientPrecache( void )
 	PRECACHE_SOUND("player/geiger2.wav");
 	PRECACHE_SOUND("player/geiger1.wav");
 
-	// temporarily precaching weapon_chub`s model
-
-	PRECACHE_MODEL("models/v_chub.mdl");
-
 	if (giPrecacheGrunt)
 		UTIL_PrecacheOther("monster_human_grunt");
 

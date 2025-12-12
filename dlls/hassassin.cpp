@@ -307,11 +307,7 @@ void CHAssassin :: Precache()
 {
 	PRECACHE_MODEL("models/hassassin.mdl");
 
-	PRECACHE_SOUND("weapons/pl_gun1.wav");
-	PRECACHE_SOUND("weapons/pl_gun2.wav");
-
 	PRECACHE_SOUND("debris/beamstart1.wav");
-
 	PRECACHE_SOUND("weapons/xbow_fire1.wav");
 }	
 	

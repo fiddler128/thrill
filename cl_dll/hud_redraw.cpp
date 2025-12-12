@@ -52,8 +52,10 @@ void CHud::UpdateScreenInfo( void )
 			xscale = 1;
 		else if (m_scrinfo.iHeight < 1000)
 			xscale = 0.75;
-		else
+		else if (m_scrinfo.iHeight < 1400)
 			xscale = 0.5;
+		else
+			xscale = 0.3;
 
 		m_iHudScaleWidth  =  m_scrinfo.iWidth * xscale;
 		m_iHudScaleHeight = m_scrinfo.iHeight * xscale;

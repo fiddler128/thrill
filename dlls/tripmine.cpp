@@ -320,12 +320,14 @@ int CTripmineGrenade :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttac
 	if ( gpGlobals->time > m_flPowerUp && bitsDamageType & ( DMG_CLUB | DMG_SLASH ) )
 	{
 		// disable
-		pev->solid = SOLID_NOT;
-		pev->effects |= EF_NODRAW;
-		SetThink( &CTripmineGrenade::SUB_Remove );
-		pev->nextthink = gpGlobals->time + 0.25;
-		Create( "weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles );
 		KillBeam();
+		UTIL_Remove(this);
+
+		CBaseEntity *pMine = Create( "weapon_tripmine", pev->origin, pev->angles );
+		
+		if ( pMine )
+			UTIL_SetSize(pMine->pev, Vector(-2, -2, -2), Vector(2, 2, 2));
+		
 		return FALSE;
 	}
 

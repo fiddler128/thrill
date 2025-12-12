@@ -89,10 +89,6 @@ class CCineApache : public CBaseMonster
 {
 public:
 	void Spawn( void );
-	void EXPORT MonsterThink ( void );
-
-	edict_t	*pentTarget;
-	CBaseEntity *pParent;
 };
 
 void CCineApache :: Spawn ( void )
@@ -101,9 +97,6 @@ void CCineApache :: Spawn ( void )
 	PRECACHE_SOUND("apache/ap_rotor1.wav");
 	SET_MODEL(ENT(pev), "models/apache_bay.mdl");
 
-//	pev->scale = 0.65;		// does not work with models for some reason
-
-//	UTIL_SetSize(pev, Vector(-8, -8, -112), Vector(8, 8, 12));
 	UTIL_SetSize(pev, Vector(4, 4, -112), Vector(4, 4, 4));
 	EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "apache/ap_rotor1.wav", 1.0, 0.3, 0, 110 );
 
@@ -118,20 +111,6 @@ void CCineApache :: Spawn ( void )
 	pev->framerate = 1.0;
 
 	m_bloodColor = DONT_BLEED;
-
-	if ( !FStringNull( pev->target ) )
-	pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(pev->target));
-	else ALERT ( at_console, "CineApache: No target!\n");
-	pParent = GetClassPtr( (CBaseEntity *) VARS(pentTarget) );	
-}
-
-void CCineApache :: MonsterThink ( void )
-{
-	ALERT ( at_console, "CineApache: Thinking!\n");
-	if ( !FStringNull( pev->target ) )
-//	pev->origin = pParent->pev->origin;
-	UTIL_SetOrigin(pev, pParent->pev->origin);
-	CBaseMonster::MonsterThink();
 }
 
 //
@@ -250,11 +229,6 @@ void CCineBlood :: BloodGush ( void )
 	pev->nextthink = gpGlobals->time + 0.1;
 
 	UTIL_MakeVectors(pev->angles);
-//  BMR : What's the purpose of removing the entity after firing?
-//	if ( pev->health-- < 0 )
-//		REMOVE_ENTITY(ENT(pev));
-//  ENDBMR
-// CHANGE_METHOD ( ENT(pev), em_think, SUB_Remove );
 
 	if ( RANDOM_FLOAT ( 0 , 1 ) < 0.7 )// larger chance of globs
 	{

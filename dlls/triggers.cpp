@@ -2988,3 +2988,35 @@ void CTargetKillClient :: Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	pPlayer->m_fCanRevive = FALSE;
 	pPlayer->Killed(pev, GIB_NEVER);
 }
+
+class CTriggerSpeed : public CBaseTrigger
+{
+public:
+	void Spawn( void );
+	void KeyValue( KeyValueData *pkvd );
+	void EXPORT MyTouch( CBaseEntity *pOther );
+};
+
+LINK_ENTITY_TO_CLASS(trigger_speed, CTriggerSpeed);
+
+void CTriggerSpeed :: KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "targetspeed"))
+	{
+		pev->speed = atoi(pkvd->szValue);	// just save to entvars
+		pkvd->fHandled = TRUE;
+	}
+	else CBaseTrigger :: KeyValue( pkvd );
+}
+
+void CTriggerSpeed :: Spawn( void )
+{
+	InitTrigger();
+	SetTouch(&CTriggerSpeed::MyTouch);
+}
+
+void CTriggerSpeed :: MyTouch( CBaseEntity *pOther )
+{	
+	if (pOther->pev->velocity.Length() >= pev->speed)
+		CBaseTrigger::MultiTouch(pOther);
+}

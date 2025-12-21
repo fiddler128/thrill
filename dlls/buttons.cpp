@@ -350,6 +350,7 @@ void CBaseButton::Precache( void )
 		case 7: m_ls.sLockedSentence = MAKE_STRING("NCON"); break; // gen containment
 		case 8: m_ls.sLockedSentence = MAKE_STRING("NH"); break; // maintenance door
 		case 9: m_ls.sLockedSentence = MAKE_STRING("NG"); break; // broken door
+		case 10: m_ls.sLockedSentence = MAKE_STRING("C1ELV"); break; // c1a1 elevator
 		
 		default: m_ls.sLockedSentence = 0; break;
 	}

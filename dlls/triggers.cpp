@@ -2621,17 +2621,31 @@ IMPLEMENT_SAVERESTORE( CTargetCommand, CBaseDelay );
 
 void CTargetCommand::Spawn( void )
 {
+	const char *pszCommand;
+
 	if ( !FClassnameIs(pev, "target_command") )
 		pev->classname = MAKE_STRING("target_command");
 
 	if ( g_pGameRules->IsMultiplayer() )
+	{
+		ALERT(at_error, "target_command in deathmatch!\n");
+		
+		UTIL_Remove(this);
+		return;
+	}
+
+	pszCommand = STRING(m_command);
+
+	if ( pszCommand[0] == '+' || pszCommand[0] == '-' )
 	{	
+		ALERT(at_error, "Action in target_command!\n");
+		
 		UTIL_Remove(this);
 		return;
 	}
 
 	pev->movetype = MOVETYPE_NONE;
-	pev->solid = SOLID_NOT;
+	pev->solid = SOLID_NOT;	
 }
 
 void CTargetCommand :: KeyValue( KeyValueData* pkvd )

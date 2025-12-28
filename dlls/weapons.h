@@ -1075,10 +1075,8 @@ public:
 	void EXPORT RocketTouch( CBaseEntity *pOther );
 	static CRpgRocket *CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBaseEntity *pOwner, CRpg *pLauncher );
 
-	int m_iTrail;
 	float m_flIgniteTime;
 	float m_flNextFireball;
-	int m_iExplode;
 	CRpg *m_pLauncher;// pointer back to the launcher that fired me. 
 };
 

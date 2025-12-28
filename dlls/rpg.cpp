@@ -103,9 +103,7 @@ void CRpgRocket :: RocketTouch ( CBaseEntity *pOther )
 void CRpgRocket :: Precache( void )
 {
 	PRECACHE_MODEL("models/rpgrocket.mdl");
-	m_iTrail = PRECACHE_MODEL("sprites/smoke.spr");
 	PRECACHE_SOUND ("weapons/rocket1.wav");
-	m_iExplode	= PRECACHE_MODEL( "sprites/explode1.spr" );
 }
 
 
@@ -221,7 +219,7 @@ void CRpgRocket :: FollowThink( void  )
 			WRITE_COORD( pev->origin.x );
 			WRITE_COORD( pev->origin.y );
 			WRITE_COORD( pev->origin.z );
-			WRITE_SHORT( m_iExplode );
+			WRITE_SHORT( g_sModelIndexFireball );
 			WRITE_BYTE( 10 ); // scale * 10
 			WRITE_BYTE( 255 ); // brightness
 		MESSAGE_END();

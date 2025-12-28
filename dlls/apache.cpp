@@ -925,14 +925,12 @@ class CApacheHVR : public CGrenade
 	int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	int m_iTrail;
 	Vector m_vecForward;
 };
 LINK_ENTITY_TO_CLASS( hvr_rocket, CApacheHVR );
 
 TYPEDESCRIPTION	CApacheHVR::m_SaveData[] = 
 {
-//	DEFINE_FIELD( CApacheHVR, m_iTrail, FIELD_INTEGER ),	// Dont' save, precache
 	DEFINE_FIELD( CApacheHVR, m_vecForward, FIELD_VECTOR ),
 };
 
@@ -965,7 +963,6 @@ void CApacheHVR :: Spawn( void )
 void CApacheHVR :: Precache( void )
 {
 	PRECACHE_MODEL("models/HVR.mdl");
-	m_iTrail = PRECACHE_MODEL("sprites/smoke.spr");
 	PRECACHE_SOUND ("weapons/rocket1.wav");
 }
 
@@ -979,22 +976,7 @@ void CApacheHVR :: IgniteThink( void  )
 
 	// make rocket sound
 	EMIT_SOUND( ENT(pev), CHAN_VOICE, "weapons/rocket1.wav", 1, 0.5 );
-
-	// rocket trail
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-
-		WRITE_BYTE( TE_BEAMFOLLOW );
-		WRITE_SHORT(entindex());	// entity
-		WRITE_SHORT(m_iTrail );	// model
-		WRITE_BYTE( 15 ); // life
-		WRITE_BYTE( 5 );  // width
-		WRITE_BYTE( 224 );   // r, g, b
-		WRITE_BYTE( 224 );   // r, g, b
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-
-	MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
-
+	
 	// set to accelerate
 	SetThink( &CApacheHVR::AccelerateThink );
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1009,6 +991,16 @@ void CApacheHVR :: AccelerateThink( void  )
 		UTIL_Remove( this );
 		return;
 	}
+
+	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
+			WRITE_BYTE( TE_SPRITE );
+			WRITE_COORD( pev->origin.x );
+			WRITE_COORD( pev->origin.y );
+			WRITE_COORD( pev->origin.z );
+			WRITE_SHORT( g_sModelIndexFireball );
+			WRITE_BYTE( 10 ); // scale * 10
+			WRITE_BYTE( 255 ); // brightness
+		MESSAGE_END();
 
 	// accelerate
 	float flSpeed = pev->velocity.Length();

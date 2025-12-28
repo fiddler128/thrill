@@ -18,8 +18,6 @@
 // hassassin - Human assassin, fast and stealthy
 //=========================================================
 
-// UNDONE: assassins keep shooting at player even after he dies, making it nearly impossible to survive after adrenaline revives him
-
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
@@ -365,7 +363,8 @@ Schedule_t slAssassinExposed[] =
 	{
 		tlAssassinExposed,
 		ARRAYSIZE ( tlAssassinExposed ),
-		bits_COND_CAN_MELEE_ATTACK1,
+		bits_COND_CAN_MELEE_ATTACK1		|
+		bits_COND_ENEMY_DEAD,
 		0,
 		"AssassinExposed",
 	},
@@ -426,7 +425,8 @@ Schedule_t	slAssassinTakeCoverFromEnemy2[] =
 	{ 
 		tlAssassinTakeCoverFromEnemy2,
 		ARRAYSIZE ( tlAssassinTakeCoverFromEnemy2 ), 
-		bits_COND_NEW_ENEMY |
+		bits_COND_NEW_ENEMY				|
+		bits_COND_ENEMY_DEAD			|
 		bits_COND_CAN_MELEE_ATTACK2		|
 		bits_COND_HEAR_SOUND,
 		

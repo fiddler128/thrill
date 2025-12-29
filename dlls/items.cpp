@@ -347,14 +347,9 @@ LINK_ENTITY_TO_CLASS(item_battery, CItemBattery);
 
 char *GetItemSuitSentence( char* chSentenceName, int iNumber )
 {
-	char *chNumber = "0";
-	static char string[8];
+	char string[32];
 
-	strcpy( string, chSentenceName );
-
-	sprintf(chNumber, "%d", iNumber);
-	strcat( string, chNumber );
-	strcat( string, "P" );
+	sprintf(string, "%s%iP", chSentenceName, iNumber);
 
 //	ALERT( at_console, "%s, %i\n", string, iNumber );
 

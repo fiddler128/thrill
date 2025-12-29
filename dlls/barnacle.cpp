@@ -358,7 +358,7 @@ void CBarnacle :: BarnacleThink ( void )
 				if ( !traceSuccessful && ( gpGlobals->time > m_flWaitForPrey + 5.0 || !m_flWaitForPrey ) && !FBitSet( pev->spawnflags, SF_BARNACLE_NO_SPHERE ) ) // don't perform sphere checks too often
 				{
 					Vector vecCenter;
-					float searchRadius;
+					float searchRadius = 48;
 
 					if ( flLength >= 1024 )
 						searchRadius = 128;

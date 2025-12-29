@@ -802,6 +802,9 @@ void CBasePlayerItem::DestroyItem( void )
 	{
 		// if attached to a player, remove. 
 		m_pPlayer->RemovePlayerItem( this );
+
+	// UNDONE: not a proper fix! the real problem must be somewhere in weapon scheduling logic
+		return;
 	}
 
 	Kill( );

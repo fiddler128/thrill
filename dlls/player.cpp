@@ -4433,8 +4433,8 @@ void CBasePlayer::ItemPostFrame()
 	if (!m_pActiveItem)
 		return;
 
-	m_pActiveItem->ItemPostFrame( );
-
+	if ( gpGlobals->time > m_fHolsterWaitTime + 0.5 )	// UNDONE: this is ugly
+		m_pActiveItem->ItemPostFrame( );
 }
 
 int CBasePlayer::AmmoInventory( int iAmmoIndex )

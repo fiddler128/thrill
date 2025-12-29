@@ -3438,13 +3438,12 @@ int CBasePlayer::Restore( CRestore &restore )
 	m_flNextAttack = UTIL_WeaponTimeBase();
 #endif
 
-	if ( m_fLongJump )
+	if ( m_fLongJump && m_iLongJumpBattery )
 	{
-		if (!m_iLongJumpBattery)
-			g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
-		else
-			g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "1" );
+		ALERT( at_aiconsole, "YOUR BATTERY SIR\n" );
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "1" );
 	}
+	else g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 
 	if ( m_fParalyzed )
 		g_engfuncs.pfnSetClientMaxspeed(edict(), 180 );

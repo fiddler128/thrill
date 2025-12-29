@@ -126,7 +126,6 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_iLongJumpBattery, FIELD_INTEGER ),
 //	DEFINE_FIELD( CBasePlayer, m_iAdrenaline, FIELD_INTEGER ),
 //	DEFINE_FIELD( CBasePlayer, m_fCanRevive, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CBasePlayer, m_fWpnScheduled, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBasePlayer, m_fParalyzed, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBasePlayer, m_flNextRevive, FIELD_TIME ),
 	
@@ -3496,12 +3495,6 @@ void CBasePlayer::SelectNextItem( int iItem )
 	}
 	
 	m_pActiveItem = pItem;
-
-/*	if (m_pActiveItem)
-	{
-		m_pActiveItem->Deploy( );
-		m_pActiveItem->UpdateItemInfo( );
-	}	*/
 }
 
 void CBasePlayer::SelectItem(const char *pstr)
@@ -3583,7 +3576,6 @@ void CBasePlayer::SelectLastItem(void)
 	if (m_pActiveItem && !m_inHolster)
 	{
 		m_pActiveItem->Holster( );
-		m_fWpnScheduled = TRUE;
 	}
 
 	CBasePlayerItem *pTemp = m_pActiveItem;
@@ -4429,13 +4421,13 @@ void CBasePlayer::ItemPostFrame()
 
 	ImpulseCommands();
 
-	if (( m_fWpnScheduled || m_inHolster ) && gpGlobals->time >= m_fHolsterWaitTime && m_pNextActiveItem )
+	if ( (m_pNextActiveItem || m_inHolster) && gpGlobals->time >= m_fHolsterWaitTime )
 	{
 		m_pActiveItem = m_pNextActiveItem;
 		m_pActiveItem->Deploy( );
 		m_pActiveItem->UpdateItemInfo( );
 		m_inHolster = FALSE;
-		m_fWpnScheduled = FALSE;
+		m_pNextActiveItem = NULL;
 	}
 
 	if (!m_pActiveItem)

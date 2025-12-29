@@ -211,7 +211,6 @@ public:
 	int					m_iAirCapacity;
 	float				m_flNextRevive;
 	BOOL				m_fCanRevive;
-	BOOL				m_fWpnScheduled;
 	BOOL				m_fParalyzed;
 	BOOL				m_fAutoWeaponSwitch;	// set by userinfo
 

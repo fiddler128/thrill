@@ -160,7 +160,6 @@ static char grgchTextureType[CTEXTURESMAX];
 int g_onladder = 0;
 
 // Variables used by alpha's ladder code
-int		g_iAlphaLadderFrame;
 float	g_iAlphaLadderSpeed;
 qboolean	g_bAlphaLadderPunchSwap;
 
@@ -2086,7 +2085,6 @@ void PM_LadderMove( physent_t *pLadder )
 	qboolean	onFloor;
 	vec3_t		floor;
 	vec3_t		modelmins, modelmaxs;
-	float		flRndSound;
 
 	if ( pmove->movetype == MOVETYPE_NOCLIP )
 		return;
@@ -2133,12 +2131,6 @@ void PM_LadderMove( physent_t *pLadder )
 		if ( pmove->flags & FL_DUCKING )
 		{
 			flSpeed *= PLAYER_DUCKING_MULTIPLIER;
-		}
-
-		if ( pmove->cmd.buttons & IN_BACK || pmove->cmd.buttons & IN_FORWARD || pmove->cmd.buttons & IN_MOVELEFT
-			|| pmove->cmd.buttons & IN_MOVERIGHT )
-		{
-			g_iAlphaLadderFrame++;
 		}
 
 		if ( pmove->cmd.buttons & IN_BACK )
@@ -2208,68 +2200,12 @@ void PM_LadderMove( physent_t *pLadder )
 					VectorMA( pmove->velocity, MAX_CLIMB_SPEED, trace.plane.normal, pmove->velocity );
 				}
 				//pev->velocity = lateral - (CrossProduct( trace.vecPlaneNormal, perp ) * normal);
-
-				if ( pmove->cmd.buttons & IN_BACK )
-				{
-					if  ( pmove->velocity[2] >= 0 )
-						pmove->velocity[2] = -MAX_CLIMB_SPEED;
-
-					pmove->velocity[2] += CLIMB_SPEED_DEC;
-				}
-				if ( pmove->cmd.buttons & IN_FORWARD )
-				{
-					if  ( pmove->velocity[2] <= 0 )
-						pmove->velocity[2] = MAX_CLIMB_SPEED;
-
-					pmove->velocity[2] -= CLIMB_SPEED_DEC;
-				}
-
-				if ( pmove->velocity[2] > MAX_CLIMB_SPEED )
-					pmove->velocity[2] = MAX_CLIMB_SPEED;
 			}
 			else
 			{
 				VectorClear( pmove->velocity );
 			}
 		}
-
-//		if ( g_iAlphaLadderFrame >= CLIMB_SHAKE_FREQUENCY )
-		if ( 0 )
-		{
-		//	pmove->Con_DPrintf("PM Climb shake\n");
-			g_iAlphaLadderFrame = 0.0;
-
-			flRndSound = pmove->RandomFloat( 0, 1 );
-
-			if ( !flRndSound )
-			{
-				pmove->PM_PlaySound( CHAN_VOICE, "player/pl_pain2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM );
-			}
-			else if ( flRndSound < 0.5 )
-			{
-				pmove->PM_PlaySound( CHAN_VOICE, "player/pl_pain4.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM );
-			}
-			else
-			{
-				if ( flRndSound < 0.75 )
-					pmove->PM_PlaySound( CHAN_VOICE, "player/pl_pain5.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM );
-				else
-					pmove->PM_PlaySound( CHAN_VOICE, "player/pl_pain6.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM );
-			}
-
-			if ( g_bAlphaLadderPunchSwap )
-			{
-				pmove->punchangle[2] = CLIMB_PUNCH_Z;
-				pmove->punchangle[0] = CLIMB_PUNCH_X;
-				g_bAlphaLadderPunchSwap = false;
-			}
-			else
-			{
-				pmove->punchangle[2] = -CLIMB_PUNCH_Z;
-				pmove->punchangle[0] = CLIMB_PUNCH_X;
-				g_bAlphaLadderPunchSwap = true;
-			}
-        }
 	}
 }
 

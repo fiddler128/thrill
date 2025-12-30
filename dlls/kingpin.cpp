@@ -36,7 +36,6 @@ public:
 	void SetYawSpeed ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 
-	void StartTask ( Task_t *pTask );
 	void RunTask ( Task_t *pTask );
 	Schedule_t *GetSchedule( void );
 	Schedule_t* GetScheduleOfType ( int Type ) ;
@@ -45,6 +44,8 @@ public:
 
 	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	void Killed( entvars_t *pevAttacker, int iGib );
+	void EXPORT DyingThink( void );
+	void EXPORT Blowup( void );
 
 	CUSTOM_SCHEDULES;
 
@@ -104,6 +105,8 @@ void CKingpin :: Precache( void )
 
 	for ( i = 0; i < ARRAYSIZE( pAttackMissSounds ); i++ )
 		PRECACHE_SOUND((char *)pAttackMissSounds[i]);
+
+	UTIL_PrecacheOther( "test_effect" );
 }
 
 int CKingpin :: Classify( void )
@@ -172,14 +175,6 @@ void CKingpin :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			RangeAttack(m_hEnemy);
 		break;
 	case KINGPIN_AE_BLOWUP:
-		pev->renderfx = kRenderFxExplode;
-		pev->rendercolor.x = 255;
-		pev->rendercolor.y = 0;
-		pev->rendercolor.z = 0;	
-
-		pev->nextthink = gpGlobals->time + .25;
-
-		SetThink(&CKingpin::SUB_Remove);
 		break;
 	default:
 		CBaseMonster::HandleAnimEvent( pEvent );
@@ -216,18 +211,6 @@ DEFINE_CUSTOM_SCHEDULES( CKingpin )
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CKingpin, CBaseMonster );
-
-void CKingpin :: StartTask ( Task_t *pTask )
-{
-	switch ( pTask->iTask )
-	{
-	default:
-		{
-			CBaseMonster::StartTask( pTask );
-			break;
-		}
-	}
-}
 
 void CKingpin :: RunTask ( Task_t *pTask )
 {
@@ -347,19 +330,53 @@ int CKingpin :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 
 void CKingpin :: Killed( entvars_t *pevAttacker, int iGib )
 {
-	CBaseMonster :: Killed (pevAttacker, iGib);
-	return;
+	CBaseMonster :: Killed (pevAttacker, GIB_NEVER);
+	
+	CBaseEntity *pPort = CBaseEntity::Create( "test_effect", Vector ( pev->origin.x, pev->origin.y, pev->origin.z + 32.0 ), g_vecZero, NULL );
+	pPort->Use(this, this, USE_ON, 0);
+
+	pev->renderamt = 255;
+	pev->rendermode = kRenderTransTexture;
+	pev->takedamage = DAMAGE_NO;
+
+	SetThink(&CKingpin::DyingThink);
+	pev->nextthink = gpGlobals->time;
+}
+
+void CKingpin :: DyingThink( void )
+{
+	pev->nextthink = gpGlobals->time + 0.1;
+
+	if ( pev->renderamt > 80 )
+	{
+		pev->renderamt -= 5;
+
+	//	keep the scheduling going
+		RunAI();
+
+		return;
+	}
 
 	pev->renderfx = kRenderFxExplode;
 	pev->rendercolor.x = 255;
 	pev->rendercolor.y = 0;
 	pev->rendercolor.z = 0;	
 
-	// UNDONE: add fancy flickering effect here
+	SetThink(&CKingpin::Blowup);
+}
 
-	pev->deadflag = DEAD_DYING;
+void CKingpin :: Blowup( void )
+{
+	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM);
+	pev->solid = SOLID_NOT;
 
-	pev->nextthink = gpGlobals->time + .25;
+	CGib::SpawnRandomGibs( pev, 9, MainGib() );
+
+	for ( int i = 0; i < 8; i++ )
+	{	
+		UTIL_BloodStream( pev->origin + Vector( 0, 0, 48 ), UTIL_RandomBloodVector(), BloodColor(), RANDOM_LONG( 80, 150 ));
+	}
 
 	SetThink(&CKingpin::SUB_Remove);
+	pev->nextthink = gpGlobals->time;
 }

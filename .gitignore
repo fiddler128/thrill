@@ -1,6 +1,5 @@
 *.obj
 *.sbr
-*.lib
 *.plg
 *.opt
 *.pdb
@@ -13,3 +12,8 @@
 *.ncb
 *.dll
 *.exe
+/dlls/.vs
+*.log
+*.txt
+cl_dll/*/*.lib
+dlls/*/*.lib
